@@ -7,11 +7,22 @@
  * - 2.3kHz付近にホーンの共鳴がある
  */
 
+// iOS Safari対応: webkitAudioContext
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
+
 let audioContext: AudioContext | null = null;
 
 export function getAudioContext(): AudioContext {
   if (!audioContext) {
-    audioContext = new AudioContext();
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+      throw new Error("Web Audio API is not supported");
+    }
+    audioContext = new AudioContextClass();
   }
   return audioContext;
 }
@@ -104,10 +115,35 @@ export function playNote(
 
 /**
  * AudioContextがsuspended状態なら再開
+ * iOS Safari対応: サイレントバッファを再生してアンロック
  */
 export async function ensureAudioContextResumed(): Promise<void> {
   const ctx = getAudioContext();
+
   if (ctx.state === "suspended") {
     await ctx.resume();
+  }
+
+  // iOS Safari対応: 無音バッファを再生してAudioContextを確実にアンロック
+  const buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+  source.start(0);
+
+  // 状態が変わるまで少し待つ
+  if (ctx.state !== "running") {
+    await new Promise<void>((resolve) => {
+      const checkState = () => {
+        if (ctx.state === "running") {
+          resolve();
+        } else {
+          setTimeout(checkState, 10);
+        }
+      };
+      setTimeout(checkState, 10);
+      // タイムアウト（500ms）
+      setTimeout(resolve, 500);
+    });
   }
 }
