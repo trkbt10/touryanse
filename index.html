@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>通りゃんせ 信号機エミュレータ</title>
+  </head>
+  <body>
+    <h1>通りゃんせ 信号機エミュレータ</h1>
+    <p class="subtitle">視覚障害者用付加装置 RUH-5 音色再現</p>
+
+    <div class="signal-box">
+      <div class="lights">
+        <div class="light red" id="redLight"></div>
+        <div class="light yellow"></div>
+        <div class="light green" id="greenLight"></div>
+      </div>
+      <div class="controls">
+        <select id="melodySelect" class="melody-select">
+          <!-- メロディはJSで動的に追加 -->
+        </select>
+        <button id="playBtn">再生</button>
+        <div class="status" id="status"></div>
+      </div>
+    </div>
+
+    <div class="lyrics" id="lyrics"></div>
+
+    <div class="info">
+      <h3>音色の特徴</h3>
+      <p>
+        信号機スピーカー（RUH-5）の帯域特性（600Hz〜6kHz）を再現。
+        矩形波をベースに、基音を削り高次倍音（3/5/7/9倍）を強調。
+        2.3kHz付近のホーン共鳴をピーキングフィルタで再現しています。
+      </p>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
